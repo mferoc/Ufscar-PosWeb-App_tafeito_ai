@@ -12,9 +12,10 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import TaskAlt from "@mui/icons-material/TaskAlt";
 import Logout from "@mui/icons-material/Logout";
-import axios from "axios";
 
 import { NavBarProps } from "./NavBar";
+import { api } from "../../provider/customAxiosProvider";
+import { url_usuarios_autenticado } from "../../utils/api";
 
 const NavBar = (props: NavBarProps) => {
   const { logout } = props;
@@ -26,7 +27,7 @@ const NavBar = (props: NavBarProps) => {
   }>(null);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/usuarios/autenticado").then((response) => {
+    api.get(url_usuarios_autenticado).then((response) => {
       console.log("xxx", response.data);
       setUserData(response.data.usuario);
     });

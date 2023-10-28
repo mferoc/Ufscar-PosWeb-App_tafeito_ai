@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Login from "./screens/Login";
 import Tasks from "./screens/Tasks";
-import ProtectRoute from "./provider/protectedRoute";
+import ProtectRoute from "./provider/protectedRoutesProvider";
 
 const Routes = () => {
   const authenticatedRoutes = [
