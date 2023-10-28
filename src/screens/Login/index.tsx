@@ -20,7 +20,10 @@ import { VisibilityOff, Visibility } from "@mui/icons-material";
 import { CustomizedCardHeader } from "./styles";
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../provider/authProvider";
 const Login = () => {
+  const { token, setToken } = useAuth();
+
   const [isButtonActive, setIsButtonActive] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
@@ -32,6 +35,12 @@ const Login = () => {
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/tarefas", { replace: true });
+    }
+  }, [token]);
 
   useEffect(() => {
     if (
@@ -70,7 +79,9 @@ const Login = () => {
         } else if (data.responseStatus === 400) {
           setErrorMessage("Requisição inválida!");
         } else if (data.responseStatus === 200) {
-          navigate("/tarefas");
+          if (data?.data?.token) {
+            setToken(data?.data?.token);
+          }
         }
       })
       .catch((error) =>
