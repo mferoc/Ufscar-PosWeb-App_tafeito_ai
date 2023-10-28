@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
+// import CardHeader from '@mui/material/CardHeader';
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import CardActions from "@mui/material/CardActions";
@@ -17,17 +18,29 @@ import {
 import { VisibilityOff, Visibility } from "@mui/icons-material";
 
 import { CustomizedCardHeader } from "./styles";
+import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../provider/authProvider";
 const Login = () => {
+  const { token, setToken } = useAuth();
+
   const [isButtonActive, setIsButtonActive] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
+
+  useEffect(() => {
+    if (token) {
+      navigate("/tarefas", { replace: true });
+    }
+  }, [token]);
 
   useEffect(() => {
     if (
@@ -66,7 +79,9 @@ const Login = () => {
         } else if (data.responseStatus === 400) {
           setErrorMessage("Requisição inválida!");
         } else if (data.responseStatus === 200) {
-          alert("Requisição válida!");
+          if (data?.data?.token) {
+            setToken(data?.data?.token);
+          }
         }
       })
       .catch((error) =>
