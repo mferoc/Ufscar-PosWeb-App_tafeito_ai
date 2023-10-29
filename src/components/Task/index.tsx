@@ -1,6 +1,7 @@
-import { Box } from "@mui/material";
 import { useState } from "react";
+import { format, parseISO } from "date-fns";
 
+import Box from "@mui/material/Box";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -14,7 +15,11 @@ import DeleteTaskDialog from "../DeleteTaskDialog";
 import { TaskProps } from "./Task";
 
 import { api } from "../../provider/customAxiosProvider";
-import { url_update_task } from "../../utils/api";
+import {
+  url_update_task,
+  url_finish_task,
+  url_reopen_task,
+} from "../../utils/api";
 import { useSnackbar } from "notistack";
 
 const Task = (props: TaskProps) => {
@@ -29,16 +34,57 @@ const Task = (props: TaskProps) => {
   const { enqueueSnackbar } = useSnackbar();
   const labelId = `checkbox-list-label-${task.id}`;
 
+  const finishTask = async () => {
+    const taskId = task?.id ?? -1;
+    const custom_task_url = url_finish_task.replace(":id", taskId.toString());
+    try {
+      await api.post(custom_task_url);
+      setError(null);
+      enqueueSnackbar("Tarefa concluída!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
+      setRefectchTaskStatus(refetchtaskStatus + 1);
+    } catch (err) {
+      setError((err as Error).message);
+      enqueueSnackbar("Erro ao tentar concluir a tarefa.", {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
+    }
+  };
+
+  const reopenTask = async () => {
+    const taskId = task?.id ?? -1;
+    const custom_task_url = url_reopen_task.replace(":id", taskId.toString());
+    try {
+      await api.post(custom_task_url);
+      setError(null);
+      enqueueSnackbar("Tarefa reaberta!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
+      setRefectchTaskStatus(refetchtaskStatus + 1);
+    } catch (err) {
+      setError((err as Error).message);
+      enqueueSnackbar("Erro ao tentar reabrir a tarefa.", {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
+    }
+  };
+
   const handleToggle = (value: number) => () => {
     const currentIndex = checked.indexOf(value);
     const newChecked = [...checked];
 
     if (currentIndex === -1) {
       newChecked.push(value);
+      finishTask();
     } else {
       newChecked.splice(currentIndex, 1);
+      reopenTask();
     }
-
     setChecked(newChecked);
   };
 
@@ -48,13 +94,27 @@ const Task = (props: TaskProps) => {
     try {
       await api.delete(custom_task_url);
       setError(null);
-      enqueueSnackbar("Tarefa deletada!", { variant: "success" });
+      enqueueSnackbar("Tarefa deletada!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
       setRefectchTaskStatus(refetchtaskStatus + 1);
     } catch (err) {
       setError((err as Error).message);
-      enqueueSnackbar("Erro ao deletar a tarefa.", { variant: "error" });
+      enqueueSnackbar("Erro ao deletar a tarefa.", {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
     }
   };
+
+  const renderFinishedText = () => {
+    if (task.data_conclusao) {
+      return format(parseISO(task.data_conclusao), "'Concluído em' dd/MM/yyyy");
+    }
+    return;
+  };
+
   return (
     <>
       <ListItem
@@ -96,7 +156,11 @@ const Task = (props: TaskProps) => {
               inputProps={{ "aria-labelledby": labelId }}
             />
           </ListItemIcon>
-          <ListItemText id={labelId} primary={task.descricao} />
+          <ListItemText
+            id={labelId}
+            primary={task.descricao}
+            secondary={renderFinishedText()}
+          />
         </ListItemButton>
       </ListItem>
       <DeleteTaskDialog
