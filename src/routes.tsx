@@ -1,8 +1,4 @@
-import * as React from "react";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./screens/Login";
 import Tasks from "./screens/Tasks";
 import ProtectRoute from "./provider/protectedRoutesProvider";

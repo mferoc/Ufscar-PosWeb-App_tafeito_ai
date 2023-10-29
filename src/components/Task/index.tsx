@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 
-import Box from "@mui/material/Box";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import { useGlobalContext } from "../../utils/global";
 import DeleteTaskDialog from "../DeleteTaskDialog";
 import TaskTags from "../TaskTags";
+import TaskActions from "../TaskActions";
 import { TaskProps } from "./Task";
 
 import { api } from "../../provider/customAxiosProvider";
@@ -20,15 +17,21 @@ import {
   url_update_task,
   url_finish_task,
   url_reopen_task,
+  url_estimate_task,
 } from "../../utils/api";
 import { useSnackbar } from "notistack";
 
 const Task = (props: TaskProps) => {
   const { task, onTaskChange } = props;
 
-  const { setIsEditingTask, setRefectchTaskStatus, refetchtaskStatus } =
-    useGlobalContext();
-  const [error, setError] = useState<null | string>(null);
+  const {
+    setIsEditingTask,
+    setRefectchTaskStatus,
+    refetchtaskStatus,
+    isLoading,
+    setIsLoading,
+  } = useGlobalContext();
+  const [_error, setError] = useState<null | string>(null);
 
   const [openedDialog, setOpenedDialog] = useState(false);
   const [checked, setChecked] = useState([0]);
@@ -36,6 +39,7 @@ const Task = (props: TaskProps) => {
   const labelId = `checkbox-list-label-${task.id}`;
 
   const finishTask = async () => {
+    setIsLoading(true);
     const taskId = task?.id ?? -1;
     const custom_task_url = url_finish_task.replace(":id", taskId.toString());
     try {
@@ -46,16 +50,19 @@ const Task = (props: TaskProps) => {
         autoHideDuration: 2000,
       });
       setRefectchTaskStatus(refetchtaskStatus + 1);
+      setIsLoading(false);
     } catch (err) {
       setError((err as Error).message);
       enqueueSnackbar("Erro ao tentar concluir a tarefa.", {
         variant: "error",
         autoHideDuration: 2000,
       });
+      setIsLoading(false);
     }
   };
 
   const reopenTask = async () => {
+    setIsLoading(true);
     const taskId = task?.id ?? -1;
     const custom_task_url = url_reopen_task.replace(":id", taskId.toString());
     try {
@@ -66,12 +73,14 @@ const Task = (props: TaskProps) => {
         autoHideDuration: 2000,
       });
       setRefectchTaskStatus(refetchtaskStatus + 1);
+      setIsLoading(false);
     } catch (err) {
       setError((err as Error).message);
       enqueueSnackbar("Erro ao tentar reabrir a tarefa.", {
         variant: "error",
         autoHideDuration: 2000,
       });
+      setIsLoading(false);
     }
   };
 
@@ -90,6 +99,7 @@ const Task = (props: TaskProps) => {
   };
 
   const deleteTask = async () => {
+    setIsLoading(true);
     const taskId = task?.id ?? -1;
     const custom_task_url = url_update_task.replace(":id", taskId.toString());
     try {
@@ -100,12 +110,28 @@ const Task = (props: TaskProps) => {
         autoHideDuration: 2000,
       });
       setRefectchTaskStatus(refetchtaskStatus + 1);
+      setIsLoading(false);
     } catch (err) {
       setError((err as Error).message);
       enqueueSnackbar("Erro ao deletar a tarefa.", {
         variant: "error",
         autoHideDuration: 2000,
       });
+      setIsLoading(false);
+    }
+  };
+
+  const estimateTask = async () => {
+    const taskId = task?.id ?? -1;
+    const custom_task_url = url_estimate_task.replace(":id", taskId.toString());
+    setIsLoading(true);
+    try {
+      const res = await api.post(custom_task_url);
+      alert(res.data.estimativa);
+      setIsLoading(false);
+    } catch (err) {
+      setError((err as Error).message);
+      setIsLoading(false);
     }
   };
 
@@ -121,29 +147,20 @@ const Task = (props: TaskProps) => {
       <ListItem
         key={task.id}
         secondaryAction={
-          <Box>
-            <IconButton
-              edge="end"
-              aria-label="editar"
-              onClick={() => {
-                onTaskChange(task.id);
-                setIsEditingTask(true);
-              }}
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              edge="end"
-              aria-label="deletar"
-              onClick={() => {
-                if (openedDialog === false) {
-                  setOpenedDialog(true);
-                }
-              }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          </Box>
+          <TaskActions
+            deleteTask={() => {
+              if (openedDialog === false) {
+                setOpenedDialog(true);
+              }
+            }}
+            editTask={() => {
+              onTaskChange(task.id);
+              setIsEditingTask(true);
+            }}
+            estimateTask={() => {
+              estimateTask();
+            }}
+          />
         }
         disablePadding
       >
