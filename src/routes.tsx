@@ -2,8 +2,6 @@ import * as React from "react";
 import {
   createBrowserRouter,
   RouterProvider,
-  Route,
-  Link,
 } from "react-router-dom";
 import Login from "./screens/Login";
 import Tasks from "./screens/Tasks";
