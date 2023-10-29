@@ -1,5 +1,4 @@
-import React, { ReactNode } from "react";
-import axios from "axios";
+import { ReactNode } from "react";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
