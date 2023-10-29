@@ -38,11 +38,7 @@ const TaskInput = (props: TaskInputProps) => {
     };
 
     try {
-      const response = await api.post(url_tasks, payload, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.post(url_tasks, payload);
       setResponse(response.data);
       setError(null);
       setTaskDescription(null);

@@ -20,7 +20,12 @@ import { VisibilityOff, Visibility } from "@mui/icons-material";
 import { CustomizedCardHeader } from "./styles";
 import { useNavigate } from "react-router-dom";
 
+import { ErrorResponse } from "../../utils/model/ErrorResponse";
 import { useAuth } from "../../provider/authProvider";
+import { api } from "../../provider/customAxiosProvider";
+import { url_login } from "../../utils/api";
+import { AxiosError } from "axios";
+
 const Login = () => {
   const { token, setToken } = useAuth();
 
@@ -55,38 +60,36 @@ const Login = () => {
     }
   }, [username, password]);
 
-  const postLogin = () => {
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        login: username,
-        senha: password,
-      }),
+  const postLogin = async () => {
+    const payload = {
+      login: username,
+      senha: password,
     };
+
     setErrorMessage("");
-    fetch("http://localhost:3000/usuarios/login", requestOptions)
-      .then(async (response) => {
-        const dataResponse = await response.json();
-        return {
-          responseStatus: response.status,
-          data: dataResponse,
-        };
-      })
-      .then((data) => {
-        if (data.responseStatus === 422 && data.data?.mensagem) {
-          setErrorMessage(data.data?.mensagem);
-        } else if (data.responseStatus === 400) {
-          setErrorMessage("Requisição inválida!");
-        } else if (data.responseStatus === 200) {
-          if (data?.data?.token) {
-            setToken(data?.data?.token);
-          }
-        }
-      })
-      .catch((error) =>
-        setErrorMessage("Erro no servidor, tente novamente em alguns minutos!")
-      );
+
+    try {
+      const dataResponse = await api.post(url_login, payload);
+
+      if (dataResponse.status === 200 && dataResponse?.data?.token) {
+        setToken(dataResponse?.data?.token);
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError;
+
+      const errorResponse: ErrorResponse = {
+        status: axiosError?.response?.status,
+        data: axiosError?.response?.data,
+      };
+
+      if (errorResponse?.status === 422 && errorResponse?.data?.mensagem) {
+        setErrorMessage(errorResponse?.data?.mensagem);
+      } else if (errorResponse?.status === 400) {
+        setErrorMessage("Requisição inválida!");
+      } else {
+        setErrorMessage("Erro no servidor, tente novamente em alguns minutos!");
+      }
+    }
   };
   return (
     <Box
