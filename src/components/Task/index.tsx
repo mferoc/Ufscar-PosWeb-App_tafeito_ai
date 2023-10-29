@@ -12,6 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useGlobalContext } from "../../utils/global";
 import DeleteTaskDialog from "../DeleteTaskDialog";
+import TaskTags from "../TaskTags";
 import { TaskProps } from "./Task";
 
 import { api } from "../../provider/customAxiosProvider";
@@ -163,6 +164,7 @@ const Task = (props: TaskProps) => {
           />
         </ListItemButton>
       </ListItem>
+      <TaskTags task={task} />
       <DeleteTaskDialog
         task={task}
         openedDialog={openedDialog}
