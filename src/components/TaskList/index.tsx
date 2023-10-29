@@ -17,36 +17,40 @@ const TaskList = (props: TaskListProps) => {
   const { tasks, categoria } = props;
 
   const [editTaskId, setEditTaskId] = useState<null | number>(null);
-  const { setIsEditingTask } = useGlobalContext();
+  const { setIsEditingTask, softDeletedTasks } = useGlobalContext();
 
   const renderTasks = () => {
-    return tasks.map((task) => {
-      return (
-        <Box key={task.id}>
-          {task.id === editTaskId ? (
-            <TaskInput
-              cancelTask={() => {
-                setEditTaskId(null);
-                setIsEditingTask(false);
-              }}
-              submitTask={() => {
-                setEditTaskId(null);
-                setIsEditingTask(false);
-              }}
-              category={categoria}
-              task={task}
-            />
-          ) : (
-            <Task
-              task={task}
-              onTaskChange={(taskId) => {
-                setEditTaskId(taskId);
-              }}
-            />
-          )}
-        </Box>
-      );
-    });
+    return tasks
+      .filter((task) => {
+        return softDeletedTasks.includes(task.id) === false;
+      })
+      .map((task) => {
+        return (
+          <Box key={task.id}>
+            {task.id === editTaskId ? (
+              <TaskInput
+                cancelTask={() => {
+                  setEditTaskId(null);
+                  setIsEditingTask(false);
+                }}
+                submitTask={() => {
+                  setEditTaskId(null);
+                  setIsEditingTask(false);
+                }}
+                category={categoria}
+                task={task}
+              />
+            ) : (
+              <Task
+                task={task}
+                onTaskChange={(taskId) => {
+                  setEditTaskId(taskId);
+                }}
+              />
+            )}
+          </Box>
+        );
+      });
   };
   return (
     <Box>
