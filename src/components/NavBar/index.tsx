@@ -14,8 +14,8 @@ import TaskAlt from "@mui/icons-material/TaskAlt";
 import Logout from "@mui/icons-material/Logout";
 
 import { NavBarProps } from "./NavBar";
-import { api } from "../../provider/customAxiosProvider";
 import { url_usuarios_autenticado } from "../../utils/api";
+import { api } from "../../provider/customAxiosProvider";
 
 const NavBar = (props: NavBarProps) => {
   const { logout } = props;
@@ -28,7 +28,6 @@ const NavBar = (props: NavBarProps) => {
 
   useEffect(() => {
     api.get(url_usuarios_autenticado).then((response) => {
-      console.log("xxx", response.data);
       setUserData(response.data.usuario);
     });
   }, []);
