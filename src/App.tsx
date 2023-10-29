@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import AuthProvider from "./provider/authProvider";
 import { SnackbarProvider } from "notistack";
@@ -11,6 +11,7 @@ function App() {
     null
   );
   const [refetchtaskStatus, setRefectchTaskStatus] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
     <div className="App">
@@ -24,6 +25,8 @@ function App() {
               setSelectedTaskInput,
               refetchtaskStatus,
               setRefectchTaskStatus,
+              isLoading,
+              setIsLoading,
             }}
           >
             <Routes />

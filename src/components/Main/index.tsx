@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import TaskInputWrapper from "../TaskInputWrapper";
 
 import { CustomizedSectionBox } from "./styles";
@@ -8,6 +8,7 @@ import { api } from "../../provider/customAxiosProvider";
 import { url_categorias } from "../../utils/api";
 import { Categoria } from "../../utils/model/Categoria";
 import TaskList from "../TaskList";
+import ProjectTasks from "../ProjectTasks";
 import { MainProps } from "./Main";
 import { useGlobalContext } from "../../utils/global";
 
@@ -62,6 +63,7 @@ const Main = (props: MainProps) => {
           {" "}
           Suas tarefas{" "}
         </Typography>
+        <ProjectTasks categories={categorias} />
       </CustomizedSectionBox>
       {categorias.map((categoria) => renderCategoriaSection(categoria))}
     </Box>
