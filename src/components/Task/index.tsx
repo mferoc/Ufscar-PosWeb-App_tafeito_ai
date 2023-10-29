@@ -19,7 +19,7 @@ import {
   url_reopen_task,
   url_estimate_task,
 } from "../../utils/api";
-import { useSnackbar } from "notistack";
+import { useSnackbar, closeSnackbar, SnackbarKey } from "notistack";
 
 const Task = (props: TaskProps) => {
   const { task, onTaskChange } = props;
@@ -28,8 +28,10 @@ const Task = (props: TaskProps) => {
     setIsEditingTask,
     setRefectchTaskStatus,
     refetchtaskStatus,
-    isLoading,
     setIsLoading,
+    softDeletedTasks,
+    setSoftDeletedTasks,
+    softDeletedTasksRef,
   } = useGlobalContext();
   const [_error, setError] = useState<null | string>(null);
 
@@ -98,16 +100,48 @@ const Task = (props: TaskProps) => {
     setChecked(newChecked);
   };
 
+  const action = (snackbarId: SnackbarKey) => (
+    <>
+      <button
+        style={{
+          color: "white",
+          backgroundColor: "rgb(212, 45, 45)",
+          opacity: "1",
+          borderRadius: "4px",
+          textAlign: "center",
+          userSelect: "none",
+          border: "0",
+          height: "24px",
+        }}
+        onClick={() => {
+          const filteredValues = softDeletedTasks.filter((x) => x !== task?.id);
+          setSoftDeletedTasks(filteredValues);
+          closeSnackbar(snackbarId);
+        }}
+      >
+        Desfazer
+      </button>
+    </>
+  );
+
   const deleteTask = async () => {
     setIsLoading(true);
     const taskId = task?.id ?? -1;
     const custom_task_url = url_update_task.replace(":id", taskId.toString());
     try {
-      await api.delete(custom_task_url);
+      const newSoftDeletedTasks = softDeletedTasks.concat(task?.id);
+      setSoftDeletedTasks(newSoftDeletedTasks);
       setError(null);
       enqueueSnackbar("Tarefa deletada!", {
         variant: "success",
-        autoHideDuration: 2000,
+        autoHideDuration: 5000,
+        action: action,
+        onExited: async () => {
+          if (softDeletedTasksRef?.current?.includes(task?.id)) {
+            await api.delete(custom_task_url);
+          }
+          setRefectchTaskStatus(refetchtaskStatus + 1);
+        },
       });
       setRefectchTaskStatus(refetchtaskStatus + 1);
       setIsLoading(false);
@@ -149,9 +183,7 @@ const Task = (props: TaskProps) => {
         secondaryAction={
           <TaskActions
             deleteTask={() => {
-              if (openedDialog === false) {
-                setOpenedDialog(true);
-              }
+              deleteTask();
             }}
             editTask={() => {
               onTaskChange(task.id);
