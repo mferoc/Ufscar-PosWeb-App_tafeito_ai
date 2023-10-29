@@ -4,10 +4,10 @@ import TaskInput from "../TaskInput";
 import { CustomizedSectionBox } from "./styles";
 import { useEffect, useState } from "react";
 
-import { api } from "../../provider/customAxiosProvider";
+import { api } from "../../provider/customAxiosProvider"
 import { url_categorias } from "../../utils/api";
 import { Categoria } from "../../utils/model/Categoria";
-
+import TaskList from "../TaskList";
 import { MainProps } from "./Main";
 
 const Main = (props: MainProps) => {
@@ -16,6 +16,7 @@ const Main = (props: MainProps) => {
   const [selectedTaskInput, setSelectedTaskInput] = useState<string | null>(
     null
   );
+  const [refetchtaskStatus, setRefectchTaskStatus] = useState<number>(0);
 
   const renderCategoriaSection = (categoria_item: Categoria) => {
     return (
@@ -30,13 +31,16 @@ const Main = (props: MainProps) => {
           {" "}
           {categoria_item.descricao}{" "}
         </Typography>
-        <div>TODO: Listar Tarefas {categoria_item.descricao}</div>
+
+        <TaskList categoria={categoria_item} taskStatus={refetchtaskStatus} />
+
         {selectedTaskInput === null ||
         selectedTaskInput === categoria_item.descricao ? (
           <TaskInput
             category={categoria_item}
             onSelectCreateTask={(category) => {
               setSelectedTaskInput(category);
+              setRefectchTaskStatus(refetchtaskStatus + 1);
             }}
           />
         ) : null}
@@ -72,19 +76,33 @@ const Main = (props: MainProps) => {
 
 const MainWrapper = () => {
   const [categorias, setCategorias] = useState<null | Categoria[]>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get(url_categorias);
+      setCategorias(response.data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api.get(url_categorias).then((response) => {
-      console.log("xxx", response.data);
-      setCategorias(response.data);
-    });
+    fetchCategories();
   }, []);
 
-  if (categorias !== null) {
+  if (categorias) {
     return <Main categorias={categorias} />;
   }
 
-  return <div>Loading!!</div>;
+  return <div>Carregando!</div>;
 };
 
 export default MainWrapper;
