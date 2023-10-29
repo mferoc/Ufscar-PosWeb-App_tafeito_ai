@@ -12,19 +12,14 @@ import { useGlobalContext } from "../../utils/global";
 
 const TaskInput = (props: TaskInputProps) => {
   const { category, task, cancelTask, submitTask } = props;
-
   const isEdit = task !== undefined;
-
   const { refetchtaskStatus, setSelectedTaskInput, setRefectchTaskStatus } =
     useGlobalContext();
-
   const [taskDescription, setTaskDescription] = useState<string>(
     task?.descricao ?? ""
   );
   const [error, setError] = useState<null | string>(null);
-
   const { enqueueSnackbar } = useSnackbar();
-
   const cancelCreateTask = () => {
     setSelectedTaskInput(null);
     setTaskDescription("");
@@ -43,11 +38,17 @@ const TaskInput = (props: TaskInputProps) => {
       setTaskDescription("");
       setSelectedTaskInput(null);
       submitTask();
-      enqueueSnackbar("Tarefa criada!", { variant: "success" });
+      enqueueSnackbar("Tarefa criada!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
       setRefectchTaskStatus(refetchtaskStatus + 1);
     } catch (err) {
       setError((err as Error).message);
-      enqueueSnackbar("Erro ao criar a tarefa.", { variant: "error" });
+      enqueueSnackbar("Erro ao criar a tarefa.", {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
     }
   };
 
@@ -64,11 +65,17 @@ const TaskInput = (props: TaskInputProps) => {
       setTaskDescription("");
       setSelectedTaskInput(null);
       submitTask();
-      enqueueSnackbar("Tarefa atualizada!", { variant: "success" });
+      enqueueSnackbar("Tarefa atualizada!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
       setRefectchTaskStatus(refetchtaskStatus + 1);
     } catch (err) {
       setError((err as Error).message);
-      enqueueSnackbar("Erro ao criar a tarefa.", { variant: "error" });
+      enqueueSnackbar("Erro ao criar a tarefa.", {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
     }
   };
 
