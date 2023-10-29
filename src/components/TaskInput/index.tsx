@@ -1,34 +1,34 @@
 import { Box, CardActions, CardContent, Card } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
-import { SnackbarProvider, VariantType, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 
 import Button from "@mui/material/Button";
-import AddTaskIcon from "@mui/icons-material/AddTask";
 
 import { api } from "../../provider/customAxiosProvider";
-import { url_tasks } from "../../utils/api";
+import { url_tasks, url_update_task } from "../../utils/api";
 import { TaskInputProps } from "./TaskInput";
+import { useGlobalContext } from "../../utils/global";
 
 const TaskInput = (props: TaskInputProps) => {
-  const { onSelectCreateTask, category } = props;
+  const { category, task, cancelTask, submitTask } = props;
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [taskDescription, setTaskDescription] = useState<string>("");
-  const [response, setResponse] = useState(null);
+  const isEdit = task !== undefined;
+
+  const { refetchtaskStatus, setSelectedTaskInput, setRefectchTaskStatus } =
+    useGlobalContext();
+
+  const [taskDescription, setTaskDescription] = useState<string>(
+    task?.descricao ?? ""
+  );
   const [error, setError] = useState<null | string>(null);
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const onClick = () => {
-    onSelectCreateTask(category.descricao);
-    setIsOpen(true);
-  };
-
   const cancelCreateTask = () => {
-    onSelectCreateTask(null);
+    setSelectedTaskInput(null);
     setTaskDescription("");
-    setIsOpen(false);
+    cancelTask();
   };
 
   const createTask = async () => {
@@ -38,15 +38,35 @@ const TaskInput = (props: TaskInputProps) => {
     };
 
     try {
-      const response = await api.post(url_tasks, payload);
-      setResponse(response.data);
+      await api.post(url_tasks, payload);
       setError(null);
       setTaskDescription("");
-      onSelectCreateTask(null);
-      setIsOpen(false);
+      setSelectedTaskInput(null);
+      submitTask();
       enqueueSnackbar("Tarefa criada!", { variant: "success" });
+      setRefectchTaskStatus(refetchtaskStatus + 1);
     } catch (err) {
-      setResponse(null);
+      setError((err as Error).message);
+      enqueueSnackbar("Erro ao criar a tarefa.", { variant: "error" });
+    }
+  };
+
+  const editTask = async () => {
+    const payload = {
+      id: task?.id,
+      descricao: taskDescription,
+    };
+    const taskId = task?.id ?? -1;
+    const custom_task_url = url_update_task.replace(":id", taskId.toString());
+    try {
+      await api.patch(custom_task_url, payload);
+      setError(null);
+      setTaskDescription("");
+      setSelectedTaskInput(null);
+      submitTask();
+      enqueueSnackbar("Tarefa atualizada!", { variant: "success" });
+      setRefectchTaskStatus(refetchtaskStatus + 1);
+    } catch (err) {
       setError((err as Error).message);
       enqueueSnackbar("Erro ao criar a tarefa.", { variant: "error" });
     }
@@ -54,58 +74,43 @@ const TaskInput = (props: TaskInputProps) => {
 
   return (
     <Box>
-      {isOpen === false ? (
-        <Box>
+      <Card>
+        <CardContent>
+          <TextField
+            fullWidth
+            id="standard-basic"
+            label="Qual é a sua tarefa?"
+            variant="standard"
+            size="small"
+            value={taskDescription}
+            onChange={(event) => setTaskDescription(event.target.value)}
+          />
+        </CardContent>
+        <CardActions
+          sx={{
+            alignSelf: "stretch",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "flex-start",
+            p: 2,
+          }}
+        >
           <Button
             component="label"
             variant="contained"
-            onClick={onClick}
-            startIcon={<AddTaskIcon />}
+            onClick={cancelCreateTask}
           >
-            Adicionar Tarefa
+            Cancelar
           </Button>
-        </Box>
-      ) : (
-        <Box>
-          <Card>
-            <CardContent>
-              <TextField
-                fullWidth
-                id="standard-basic"
-                label="Qual é a sua tarefa?"
-                variant="standard"
-                size="small"
-                value={taskDescription}
-                onChange={(event) => setTaskDescription(event.target.value)}
-              />
-            </CardContent>
-            <CardActions
-              sx={{
-                alignSelf: "stretch",
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "flex-start",
-                p: 2,
-              }}
-            >
-              <Button
-                component="label"
-                variant="contained"
-                onClick={cancelCreateTask}
-              >
-                Cancelar
-              </Button>
-              <Button
-                component="label"
-                variant="contained"
-                onClick={createTask}
-              >
-                Criar
-              </Button>
-            </CardActions>
-          </Card>
-        </Box>
-      )}
+          <Button
+            component="label"
+            variant="contained"
+            onClick={isEdit ? editTask : createTask}
+          >
+            {isEdit ? "Editar" : "Criar"}
+          </Button>
+        </CardActions>
+      </Card>
     </Box>
   );
 };
