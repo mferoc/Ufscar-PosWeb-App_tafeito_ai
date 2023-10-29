@@ -77,20 +77,23 @@ const ProjectTasks = (props: ProjectTasksProps) => {
     };
     try {
       const res = await api.post(url_project_task, payload);
-      console.log("recebi resposta");
       await Promise.all(
-        res.data?.tarefas.map((taskSuggestion: string) => {
-          console.log("criando tarefa da lista");
-          createTask(currentCategory.id, taskSuggestion);
-        })
+        res.data?.tarefas.map((taskSuggestion: string) =>
+          createTask(currentCategory.id, taskSuggestion)
+        )
       );
       setIsLoading(false);
-      enqueueSnackbar("Tarefas criadas!", { variant: "success" });
+      enqueueSnackbar("Tarefas criadas!", {
+        variant: "success",
+        autoHideDuration: 2000,
+      });
       setRefectchTaskStatus(refetchtaskStatus + 1);
     } catch (err) {
-      console.log("erro -> ", err);
       setIsLoading(false);
-      enqueueSnackbar("Erro ao criar as tarefas.", { variant: "error" });
+      enqueueSnackbar("Erro ao criar as tarefas.", {
+        variant: "error",
+        autoHideDuration: 2000,
+      });
     }
     setSelectedCat(-1);
     setProjectText("");
