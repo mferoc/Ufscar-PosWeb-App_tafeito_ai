@@ -1,5 +1,5 @@
 # Ufscar-PosWeb-App_tafeito_ai
-Gerenciador de tarefas estilo "todo list" criado com react e typescript na disciplina de programação web backend ao frontend na especialização em desenvolvimento web ufscar 2023
+Gerenciador de tarefas estilo "todo list" criado com react e typescript na disciplina de programação web backend ao frontend na especialização em desenvolvimento de software para web na Ufscar, turma 2023
 
 # Getting Started with Create React App
 
